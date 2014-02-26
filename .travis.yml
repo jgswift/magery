@@ -7,7 +7,7 @@ php:
 
 before_script:
   - mkdir -p ~/.composer
-  - echo '{"config":{"github-oauth":{"github.com":"9ce09134a109ffe063cd9e865b8251eeb99ba5a2"}}}' > ~/.composer/config.json
+  - cp .travis.composer.config.json ~/.composer/config.json
   - composer self-update
   - composer update --prefer-source --dev --no-interaction
 
