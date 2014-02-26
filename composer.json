@@ -20,8 +20,8 @@
     },
     "autoload": {
         "psr-4": {
-            "jgswift\\Magery\\": "src/",
-            "jgswift\\Magery\\Tests\\": "tests/"
+            "Magery\\": "src/",
+            "Magery\\Tests\\": "tests/"
         }
     }
 }
