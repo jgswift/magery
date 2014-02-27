@@ -1,5 +1,6 @@
 {
     "name": "jgswift/magery",
+    "version": "1.0.0",
     "description": "PHP 5.4+ magic interception system using traits",
     "keywords": ["php", "event", "magic"],
     "license": "MIT",
