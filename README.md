@@ -166,7 +166,7 @@ $foo->magery('set', 'bar', function($v){
     $this->baz = $v;
 });
 
-$foo->baz = 'somethingImportant';
+$foo->bar = 'somethingImportant';
 
 var_dump($foo->baz);   // somethingImportant
 ```
