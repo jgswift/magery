@@ -14,7 +14,7 @@ php composer.phar require jgswift/magery:dev-master
 
 ## Usage
 
-Magery allows your to attach global hooks to the magic methods: __get, __set, __unset, __isset, and __call.
+Magery allows you to attach global hooks to the magic methods: __get, __set, __unset, __isset, and __call.
 
 ```php
 <?php
