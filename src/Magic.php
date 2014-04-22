@@ -113,6 +113,10 @@ namespace Magery {
 
                 $key = self::normalizeSpellName($spell);
 
+                if(is_null($key)) {
+                    return;
+                }
+                
                 if(!array_key_exists($id,self::$objects)) {
                     self::$objects[$id] = [$key=>[]];
                 }
@@ -138,34 +142,24 @@ namespace Magery {
          * @return string
          */
         private static function normalizeSpellName($spell) {
-            switch($spell) {
-                case 'read':
-                case 'get':
-                    $key = 'read';
-                    break;
-                case 'write':
-                case 'set':
-                    $key = 'write';
-                    break;
-                case 'isset':
-                case 'exists':
-                    $key = 'exists';
-                    break;
-                case 'unset':
-                case 'remove':
-                    $key = 'remove';
-                    break;
-                case 'call':
-                case 'delegate':
-                case 'function':
-                case 'method':
-                    $key = 'call';
-                    break;
-                default:
-                    $key = $spell;
+            $mapping = [
+                'read' => 'read',
+                'get' => 'read',
+                'write' => 'write',
+                'set' => 'write',
+                'exists' => 'exists',
+                'isset' => 'exists',
+                'remove' => 'remove',
+                'unset' => 'remove',
+                'call' => 'call',
+                'delegate' => 'call',
+                'function' => 'call',
+                'method' => 'call'
+            ];
+            
+            if(array_key_exists($spell,$mapping)) {
+                return $mapping[$spell];
             }
-                
-            return $key;
         }
         
         /**
