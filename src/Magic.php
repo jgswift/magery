@@ -53,8 +53,7 @@ namespace Magery {
          * @param boolean $cacheResponse
          */
         static function register($object,$spell,$variables,callable $callable,$cacheResponse=false) {
-            $id = self::id($object);
-            foreach (array_filter((array)$spell, function($item) {
+            $spells = array_filter((array)$spell, function($item) {
                 return in_array($item, [
                     'read', 
                     'write', 
@@ -69,13 +68,30 @@ namespace Magery {
                     'method',
                     'function',
                 ]);
-            }) as $spell) {
-                foreach (array_unique((array) $variables) as $var) {
-                    if (!isset(self::$variables[$id])) {
+            });
+            
+            self::registerSpells($object, $spells, $variables, $callable, $cacheResponse);
+        }
+        
+        /**
+         * Helper method to register magic in aggregate
+         * @param mixed $object
+         * @param array $spells
+         * @param mixed $variables
+         * @param callable $callable
+         * @param boolean $cacheResponse
+         */
+        private static function registerSpells($object,array $spells,$variables,callable $callable,$cacheResponse=false) {
+            $id = self::id($object);
+            
+            foreach($spells as $spell) {
+                $uniqueVars = array_unique((array)$variables);
+                foreach($uniqueVars as $var) {
+                    if(!array_key_exists($id,self::$variables)) {
                         self::$variables[$id] = [];
                     }
                     
-                    if(!isset(self::$variables[$id][$var])) {
+                    if(!array_key_exists($var,self::$variables[$id])) {
                         self::$variables[$id][$var] = ($object->$var !== null) 
                                 ? $object->$var 
                                 : new None();
