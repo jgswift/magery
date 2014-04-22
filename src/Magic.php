@@ -131,6 +131,66 @@ namespace Magery {
         }
         
         /**
+         * Helper method to handle triggering of cached magic
+         * @param string $id
+         * @param string $fn
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @return mixed
+         */
+        private static function magicCache($id,$fn,$object,$name,$value=null) {
+            if(array_key_exists($fn,self::$objects[$id]) &&
+               array_key_exists($name, self::$objects[$id][$fn])) {
+                $events = &self::$objects[$id][$fn][$name];
+                $eventSize = sizeof($events);
+                for($i = 0; $i < $eventSize; $i++) {
+                    $data = &$events[$i];
+                    
+                    $cachedValue = self::trigger($object,$name,null,$data,true);
+                    
+                    if($cachedValue) {
+                        return $cachedValue;
+                    }
+                }
+            }
+            
+            if(array_key_exists($name,self::$variables[$id])) {
+                return self::$variables[$id][$name];
+            }
+            
+            return null;
+        }
+        
+        /**
+         * Helper method to handle triggering
+         * @param string $id
+         * @param string $fn
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @return mixed
+         */
+        private static function magic($id,$fn,$object,$name,$value=null) {
+            if(array_key_exists($fn,self::$objects[$id]) &&
+               array_key_exists($name, self::$objects[$id][$fn])) {
+                $events = self::$objects[$id][$fn][$name];
+                $eventSize = sizeof($events);
+                for ($i = 0; $i < $eventSize; $i++) {
+                    $data = &$events[$i];
+                    
+                    self::trigger($object,$name,$value,$data);
+                }
+            }
+
+            if(array_key_exists($name,self::$variables[$id]) && !empty($value)) {
+                return self::$variables[$id][$name] = $value;
+            } 
+            
+            return null;
+        }
+        
+        /**
          * Helper method that performs trigger
          * @param mixed $object
          * @param string $name
@@ -214,23 +274,11 @@ namespace Magery {
          */
         static function read($object,$name) {
             $id = self::id($object);
-            if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
-               array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $events = &self::$objects[$id][__FUNCTION__][$name];
-                $eventSize = sizeof($events);
-                for($i = 0; $i < $eventSize; $i++) {
-                    $data = &$events[$i];
-                    
-                    $cachedValue = self::trigger($object,$name,null,$data,true);
-                    
-                    if($cachedValue) {
-                        return $cachedValue;
-                    }
-                }
-            }
             
-            if(array_key_exists($name,self::$variables[$id])) {
-                return self::$variables[$id][$name];
+            $value = self::magicCache($id, __FUNCTION__, $object, $name);
+            
+            if($value) {
+                return $value;
             }
             
             return new None();
@@ -244,21 +292,8 @@ namespace Magery {
          */
         static function write($object,$name,$value) {
             $id = self::id($object);
-            if(array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $events = self::$objects[$id][__FUNCTION__][$name];
-                $eventSize = sizeof($events);
-                for ($i = 0; $i < $eventSize; $i++) {
-                    $data = $events[$i];
-                    
-                    self::trigger($object,$name,$value,$data);
-                }
-            }
-
-            if(self::$variables[$id][$name]) {
-                self::$variables[$id][$name] = $value;
-            }
-
-            return self::$variables[$id][$name];
+            
+            return self::magic($id, __FUNCTION__, $object, $name, $value);
         }
         
         /**
@@ -268,22 +303,13 @@ namespace Magery {
          */
         static function exists($object,$name) {
             $id = self::id($object);
-            if (array_key_exists(__FUNCTION__,self::$objects[$id]) &&
-                array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $events = self::$objects[$id][__FUNCTION__][$name];
-                $eventSize = sizeof($events);
-                for ($i = 0; $i < $eventSize; $i++) {
-                    $data = $events[$i];
-                    
-                    self::trigger($object,$name,null,$data);
-                }
-            }
-
-            if(array_key_exists($name,self::$variables[$id]) &&
-               !(self::$variables[$id][$name] instanceof None)) {
+            
+            $value = self::magic($id, __FUNCTION__, $object, $name);
+            if($value &&
+               !($value instanceof None)) {
                 return true;
             }
-
+            
             return false;
         }
         
@@ -293,16 +319,7 @@ namespace Magery {
          */
         static function remove($object,$name) {
             $id = self::id($object);
-            if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
-               array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $events = self::$objects[$id][__FUNCTION__][$name];
-                $eventSize = sizeof($events);
-                for ($i = 0; $i < $eventSize; $i++) {
-                    $data = $events[$i];
-                    
-                    self::trigger($object,$name,null,$data);
-                }
-            }
+            self::magic($id, __FUNCTION__, $object, $name);
 
             if(self::$variables[$id][$name]) {
                 unset(self::$variables[$id][$name]);
@@ -318,19 +335,10 @@ namespace Magery {
          */
         static function call($object,$name,$arguments=[]) {
             $id = self::id($object);
-            if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
-               array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $events = self::$objects[$id][__FUNCTION__][$name];
-                $eventSize = sizeof($events);
-                for($i = 0; $i < $eventSize; $i++) {
-                    $data = $events[$i];
-                    
-                    $cachedValue = self::trigger($object,$name,$arguments,$data,true);
-                    
-                    if($cachedValue) {
-                        return $cachedValue;
-                    }
-                }
+            $value = self::magicCache($id, __FUNCTION__, $object, $name);
+            
+            if($value) {
+                return $value;
             }
         }
     }
