@@ -110,15 +110,15 @@ namespace Magery {
                             $key = $spell;
                     }
                     
-                    if(!isset(self::$objects[$id])) {
+                    if(!array_key_exists($id,self::$objects)) {
                         self::$objects[$id] = [$key=>[]];
                     }
                     
-                    if(!isset(self::$objects[$id][$key])) {
+                    if(!array_key_exists($key,self::$objects[$id])) {
                         self::$objects[$id][$key] = [];
                     }
                     
-                    if(!isset(self::$objects[$id][$key][$var])) {
+                    if(!array_key_exists($var,self::$objects[$id][$key])) {
                         self::$objects[$id][$key][$var] = [];
                     }
                     
