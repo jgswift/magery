@@ -130,6 +130,56 @@ namespace Magery {
             }
         }
         
+        private static function trigger($object, $name, $value, &$eventData, $cache = false) {
+            if($cache) {
+                return self::triggerCache($object, $name, $value, $eventData);
+            }
+            
+            return self::triggerDirect($object, $name, $value, $eventData);
+        }
+        
+        private static function triggerCache($object, $name, $value, &$eventData) {
+            if($eventData['cache'] && 
+                isset($eventData['response'])) {
+                return $eventData['response'];
+            }
+
+            $callable = $eventData['callable'];
+            if($callable instanceof \Closure) {
+                $callable->bindTo($object,$object);
+            }
+
+            if(is_array($value)) {
+                $response = call_user_func_array($callable,$value);
+            } else {
+                $response = call_user_func($callable);
+            }
+
+            if($eventData['cache'] && 
+                is_null($response)) {
+                throw new Exception('Event registered on read of variable "' . $name . '" does not return a cacheable response - cannot be null');
+            }
+
+            if(isset($response)) {
+                if ($eventData['cache']) {
+                    $eventData['response'] = $response;
+                    return $eventData['response'];
+                }
+
+                return $response;
+            }
+            
+            return null;
+        }
+        
+        private static function triggerDirect($object, $name, $value, $eventData) {
+            $callable = $eventData['callable'];
+            if($callable instanceof \Closure) {
+                $callable->bindTo($object,$object);
+            }
+            $callable($value);
+        }
+        
         /**
          * @param mixed $object
          * @param string $name
@@ -140,32 +190,15 @@ namespace Magery {
             $id = self::id($object);
             if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
                array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $eventSize = sizeof(self::$objects[$id][__FUNCTION__][$name]);
+                $events = &self::$objects[$id][__FUNCTION__][$name];
+                $eventSize = sizeof($events);
                 for($i = 0; $i < $eventSize; $i++) {
-                    if(self::$objects[$id][__FUNCTION__][$name][$i]['cache'] && 
-                        isset(self::$objects[$id][__FUNCTION__][$name][$i]['response'])) {
-                        return self::$objects[$id][__FUNCTION__][$name][$i]['response'];
-                    }
-
-                    $callable = self::$objects[$id][__FUNCTION__][$name][$i]['callable'];
-                    if($callable instanceof \Closure) {
-                        $callable->bindTo($object,$object);
-                    }
+                    $data = &$events[$i];
                     
-                    $response = call_user_func($callable);
+                    $cachedValue = self::trigger($object,$name,null,$data,true);
                     
-                    if(self::$objects[$id][__FUNCTION__][$name][$i]['cache'] && 
-                        is_null($response)) {
-                        throw new Exception('Event registered on read of variable "' . $name . '" does not return a cacheable response - cannot be null');
-                    }
-
-                    if(isset($response)) {
-                        if (self::$objects[$id][__FUNCTION__][$name][$i]['cache']) {
-                            self::$objects[$id][__FUNCTION__][$name][$i]['response'] = $response;
-                            return self::$objects[$id][__FUNCTION__][$name][$i]['response'];
-                        }
-                        
-                        return $response;
+                    if($cachedValue) {
+                        return $cachedValue;
                     }
                 }
             }
@@ -186,13 +219,12 @@ namespace Magery {
         static function write($object,$name,$value) {
             $id = self::id($object);
             if(array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $eventSize = sizeof(self::$objects[$id][__FUNCTION__][$name]);
+                $events = self::$objects[$id][__FUNCTION__][$name];
+                $eventSize = sizeof($events);
                 for ($i = 0; $i < $eventSize; $i++) {
-                    $callable = self::$objects[$id][__FUNCTION__][$name][$i]['callable'];
-                    if($callable instanceof \Closure) {
-                        $callable->bindTo($object,$object);
-                    }
-                    $callable($value);
+                    $data = $events[$i];
+                    
+                    self::trigger($object,$name,$value,$data);
                 }
             }
 
@@ -212,13 +244,12 @@ namespace Magery {
             $id = self::id($object);
             if (array_key_exists(__FUNCTION__,self::$objects[$id]) &&
                 array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $eventSize = sizeof(self::$objects[$id][__FUNCTION__][$name]);
+                $events = self::$objects[$id][__FUNCTION__][$name];
+                $eventSize = sizeof($events);
                 for ($i = 0; $i < $eventSize; $i++) {
-                    $callable = self::$objects[$id][__FUNCTION__][$name][$i]['callable'];
-                    if($callable instanceof \Closure) {
-                        $callable->bindTo($object,$object);
-                    }
-                    $callable();
+                    $data = $events[$i];
+                    
+                    self::trigger($object,$name,null,$data);
                 }
             }
 
@@ -238,13 +269,12 @@ namespace Magery {
             $id = self::id($object);
             if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
                array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $eventSize = sizeof(self::$objects[$id][__FUNCTION__][$name]);
+                $events = self::$objects[$id][__FUNCTION__][$name];
+                $eventSize = sizeof($events);
                 for ($i = 0; $i < $eventSize; $i++) {
-                    $callable = self::$objects[$id][__FUNCTION__][$name][$i]['callable'];
-                    if($callable instanceof \Closure) {
-                        $callable->bindTo($object,$object);
-                    }
-                    $callable();
+                    $data = $events[$i];
+                    
+                    self::trigger($object,$name,null,$data);
                 }
             }
 
@@ -264,31 +294,15 @@ namespace Magery {
             $id = self::id($object);
             if(array_key_exists(__FUNCTION__,self::$objects[$id]) &&
                array_key_exists($name, self::$objects[$id][__FUNCTION__])) {
-                $eventSize = sizeof(self::$objects[$id][__FUNCTION__][$name]);
+                $events = self::$objects[$id][__FUNCTION__][$name];
+                $eventSize = sizeof($events);
                 for($i = 0; $i < $eventSize; $i++) {
-                    if(self::$objects[$id][__FUNCTION__][$name][$i]['cache'] && 
-                        isset(self::$objects[$id][__FUNCTION__][$name][$i]['response'])) {
-                        return self::$objects[$id][__FUNCTION__][$name][$i]['response'];
-                    }
-
-                    $callable = self::$objects[$id][__FUNCTION__][$name][$i]['callable'];
-                    if($callable instanceof \Closure) {
-                        $callable->bindTo($object,$object);
-                    }
+                    $data = $events[$i];
                     
-                    $response = call_user_func_array($callable,$arguments);
-                    if(self::$objects[$id][__FUNCTION__][$name][$i]['cache'] && 
-                        is_null($response)) {
-                        throw new Exception('Event registered on read of variable "' . $name . '" does not return a cacheable response - cannot be null');
-                    }
-
-                    if(isset($response)) {
-                        if (self::$objects[$id][__FUNCTION__][$name][$i]['cache']) {
-                            self::$objects[$id][__FUNCTION__][$name][$i]['response'] = $response;
-                            return self::$objects[$id][__FUNCTION__][$name][$i]['response'];
-                        }
-                        
-                        return $response;
+                    $cachedValue = self::trigger($object,$name,$arguments,$data,true);
+                    
+                    if($cachedValue) {
+                        return $cachedValue;
                     }
                 }
             }

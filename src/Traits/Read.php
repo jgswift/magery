@@ -1,6 +1,7 @@
 <?php
 namespace Magery\Traits {
-    use Magery\None,Magery\Magic;
+    use Magery\None;
+    use Magery\Magic;
     /**
      * Read trait
      * @package Magery
@@ -13,7 +14,7 @@ namespace Magery\Traits {
          */
         public function __get($name) {
             return (($value = Magic::read($this,$name)) instanceof None) 
-                        ? isset($this->$name) ? $this->name : null
+                        ? isset($this->$name) ? $this->$name : null
                         : $value;
         }
     }
