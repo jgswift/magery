@@ -130,6 +130,15 @@ namespace Magery {
             }
         }
         
+        /**
+         * Helper method that performs trigger
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @param array $eventData
+         * @param boolean $cache
+         * @return mixed
+         */
         private static function trigger($object, $name, $value, &$eventData, $cache = false) {
             if($cache) {
                 return self::triggerCache($object, $name, $value, $eventData);
@@ -138,6 +147,15 @@ namespace Magery {
             return self::triggerDirect($object, $name, $value, $eventData);
         }
         
+        /**
+         * Cached triggering
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @param array $eventData
+         * @return null
+         * @throws Exception
+         */
         private static function triggerCache($object, $name, $value, &$eventData) {
             if($eventData['cache'] && 
                 isset($eventData['response'])) {
@@ -149,11 +167,12 @@ namespace Magery {
                 $callable->bindTo($object,$object);
             }
 
+            $args = [];
             if(is_array($value)) {
-                $response = call_user_func_array($callable,$value);
-            } else {
-                $response = call_user_func($callable);
-            }
+                $args = $value;
+            } 
+            
+            $response = call_user_func_array($callable,$args);
 
             if($eventData['cache'] && 
                 is_null($response)) {
@@ -172,6 +191,13 @@ namespace Magery {
             return null;
         }
         
+        /**
+         * Noncached triggering
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @param array $eventData
+         */
         private static function triggerDirect($object, $name, $value, $eventData) {
             $callable = $eventData['callable'];
             if($callable instanceof \Closure) {
