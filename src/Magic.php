@@ -111,32 +111,7 @@ namespace Magery {
 
                 unset($object->$var);
 
-                switch($spell) {
-                    case 'read':
-                    case 'get':
-                        $key = 'read';
-                        break;
-                    case 'write':
-                    case 'set':
-                        $key = 'write';
-                        break;
-                    case 'isset':
-                    case 'exists':
-                        $key = 'exists';
-                        break;
-                    case 'unset':
-                    case 'remove':
-                        $key = 'remove';
-                        break;
-                    case 'call':
-                    case 'delegate':
-                    case 'function':
-                    case 'method':
-                        $key = 'call';
-                        break;
-                    default:
-                        $key = $spell;
-                }
+                $key = self::normalizeSpellName($spell);
 
                 if(!array_key_exists($id,self::$objects)) {
                     self::$objects[$id] = [$key=>[]];
@@ -155,6 +130,42 @@ namespace Magery {
                     'cache' => $cacheResponse
                 ];
             }
+        }
+        
+        /**
+         * Adds multiple naming conventions for magic
+         * @param string $spell
+         * @return string
+         */
+        private static function normalizeSpellName($spell) {
+            switch($spell) {
+                case 'read':
+                case 'get':
+                    $key = 'read';
+                    break;
+                case 'write':
+                case 'set':
+                    $key = 'write';
+                    break;
+                case 'isset':
+                case 'exists':
+                    $key = 'exists';
+                    break;
+                case 'unset':
+                case 'remove':
+                    $key = 'remove';
+                    break;
+                case 'call':
+                case 'delegate':
+                case 'function':
+                case 'method':
+                    $key = 'call';
+                    break;
+                default:
+                    $key = $spell;
+            }
+                
+            return $key;
         }
         
         /**
