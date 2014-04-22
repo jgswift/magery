@@ -82,67 +82,78 @@ namespace Magery {
          * @param boolean $cacheResponse
          */
         private static function registerSpells($object,array $spells,$variables,callable $callable,$cacheResponse=false) {
-            $id = self::id($object);
-            
             foreach($spells as $spell) {
-                $uniqueVars = array_unique((array)$variables);
-                foreach($uniqueVars as $var) {
-                    if(!array_key_exists($id,self::$variables)) {
-                        self::$variables[$id] = [];
-                    }
-                    
-                    if(!array_key_exists($var,self::$variables[$id])) {
-                        self::$variables[$id][$var] = ($object->$var !== null) 
-                                ? $object->$var 
-                                : new None();
-                    }
-
-                    unset($object->$var);
-
-                    switch($spell) {
-                        case 'read':
-                        case 'get':
-                            $key = 'read';
-                            break;
-                        case 'write':
-                        case 'set':
-                            $key = 'write';
-                            break;
-                        case 'isset':
-                        case 'exists':
-                            $key = 'exists';
-                            break;
-                        case 'unset':
-                        case 'remove':
-                            $key = 'remove';
-                            break;
-                        case 'call':
-                        case 'delegate':
-                        case 'function':
-                        case 'method':
-                            $key = 'call';
-                            break;
-                        default:
-                            $key = $spell;
-                    }
-                    
-                    if(!array_key_exists($id,self::$objects)) {
-                        self::$objects[$id] = [$key=>[]];
-                    }
-                    
-                    if(!array_key_exists($key,self::$objects[$id])) {
-                        self::$objects[$id][$key] = [];
-                    }
-                    
-                    if(!array_key_exists($var,self::$objects[$id][$key])) {
-                        self::$objects[$id][$key][$var] = [];
-                    }
-                    
-                    self::$objects[$id][$key][$var][] =  [
-                        'callable' => $callable,
-                        'cache' => $cacheResponse
-                    ];
+                self::registerSpell($object, $spell, $variables, $callable,$cacheResponse);
+            }
+        }
+        
+        /**
+         * Helper method to register individual spell
+         * @param mixed $object
+         * @param string $spell
+         * @param mixed $variables
+         * @param callable $callable
+         * @param boolean $cacheResponse
+         */
+        private static function registerSpell($object,$spell,$variables,callable $callable,$cacheResponse=false) {
+            $id = self::id($object);
+            $uniqueVars = array_unique((array)$variables);
+            foreach($uniqueVars as $var) {
+                if(!array_key_exists($id,self::$variables)) {
+                    self::$variables[$id] = [];
                 }
+
+                if(!array_key_exists($var,self::$variables[$id])) {
+                    self::$variables[$id][$var] = ($object->$var !== null) 
+                            ? $object->$var 
+                            : new None();
+                }
+
+                unset($object->$var);
+
+                switch($spell) {
+                    case 'read':
+                    case 'get':
+                        $key = 'read';
+                        break;
+                    case 'write':
+                    case 'set':
+                        $key = 'write';
+                        break;
+                    case 'isset':
+                    case 'exists':
+                        $key = 'exists';
+                        break;
+                    case 'unset':
+                    case 'remove':
+                        $key = 'remove';
+                        break;
+                    case 'call':
+                    case 'delegate':
+                    case 'function':
+                    case 'method':
+                        $key = 'call';
+                        break;
+                    default:
+                        $key = $spell;
+                }
+
+                if(!array_key_exists($id,self::$objects)) {
+                    self::$objects[$id] = [$key=>[]];
+                }
+
+                if(!array_key_exists($key,self::$objects[$id])) {
+                    self::$objects[$id][$key] = [];
+                }
+
+                if(!array_key_exists($var,self::$objects[$id][$key])) {
+                    self::$objects[$id][$key][$var] = [];
+                }
+
+                self::$objects[$id][$key][$var][] =  [
+                    'callable' => $callable,
+                    'cache' => $cacheResponse
+                ];
             }
         }
         
