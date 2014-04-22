@@ -4,6 +4,7 @@ magery
 PHP 5.4+ magic interception system using traits
 
 [![Build Status](https://travis-ci.org/jgswift/magery.png?branch=master)](https://travis-ci.org/jgswift/magery)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jgswift/magery/badges/quality-score.png?s=09ecf4d598dfdb7d99070e7ba8a7d197abddfae1)](https://scrutinizer-ci.com/g/jgswift/magery/)
 
 ## Installation
 

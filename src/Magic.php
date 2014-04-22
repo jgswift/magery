@@ -147,7 +147,7 @@ namespace Magery {
                 for($i = 0; $i < $eventSize; $i++) {
                     $data = &$events[$i];
                     
-                    $cachedValue = self::trigger($object,$name,null,$data,true);
+                    $cachedValue = self::trigger($object,$name,$value,$data,true);
                     
                     if($cachedValue) {
                         return $cachedValue;
