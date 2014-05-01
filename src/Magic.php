@@ -236,7 +236,7 @@ namespace Magery {
                 return self::triggerCache($object, $name, $value, $eventData);
             }
             
-            return self::triggerDirect($object, $name, $value, $eventData);
+            return self::triggerDirect($object, $value, $eventData);
         }
         
         /**
@@ -290,7 +290,7 @@ namespace Magery {
          * @param mixed $value
          * @param array $eventData
          */
-        private static function triggerDirect($object, $name, $value, $eventData) {
+        private static function triggerDirect($object, $value, $eventData) {
             $callable = $eventData['callable'];
             if($callable instanceof \Closure) {
                 $callable->bindTo($object,$object);
@@ -367,7 +367,7 @@ namespace Magery {
          */
         static function call($object,$name,$arguments=[]) {
             $id = self::id($object);
-            $value = self::magicCache($id, __FUNCTION__, $object, $name);
+            $value = self::magicCache($id, __FUNCTION__, $object, $name, $arguments);
             
             if($value) {
                 return $value;
