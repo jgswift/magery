@@ -15,7 +15,7 @@ php composer.phar require jgswift/magery:dev-master
 
 ## Usage
 
-Magery allows you to attach global hooks to the magic methods: __get, __set, __unset, __isset, and __call.
+Magery allows you to attach instance hooks to the magic methods: __get, __set, __unset, __isset, and __call.
 
 ```php
 <?php
@@ -152,13 +152,15 @@ $foo->magery('get', 'bar', function(){
 var_dump($foo['bar']);   // Baz
 ```
 
-You can create custom mages with selective magic.  This example class only includes write magic and all other operations are performed natively without interruption.
+You can create custom mages with selective magic.  
+This example class only includes write magic and all other operations are performed natively without interruption.
+Custom magery objects must use ```Magery\Object``` and you may choose from the ```Traits/Read```, ```Traits/Write```, ```Traits/Remove```, ```Traits/Exists``` traits to apply specific magery functionality.
 
 ```php
 <?php
 class Foo
 {
-    use Magery\Object, Magery\Set;
+    use Magery\Object, Magery\Traits\Write;
 }
 
 $foo = new Foo();
