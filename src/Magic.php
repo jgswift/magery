@@ -187,6 +187,10 @@ namespace Magery {
                 }
             }
             
+            if(!array_key_exists($id,self::$variables)) {
+                self::$variables[$id] = [];
+            }
+            
             if(array_key_exists($name,self::$variables[$id])) {
                 return self::$variables[$id][$name];
             }

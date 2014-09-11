@@ -128,18 +128,6 @@ namespace Magery\Tests {
             $this->assertEquals(1,$c);
         }
         
-        function testObjectRemoveExtended() {
-            $user = new Mock\User();
-            $c = 0;
-            $firstName = 'Foo';
-            $user->name = $firstName;
-            $user->remove('name', function()use(&$c) {
-                unset($this->name);
-            });
-            
-            $this->assertEquals(false, isset($user->name));
-        }
-        
         function testObjectExistsEvent() {
             $user = new Mock\User();
             $c = 0;
@@ -155,19 +143,7 @@ namespace Magery\Tests {
             $this->assertSame($user->name,$firstName);
             $this->assertEquals(1,$c);
         }
-        
-        function testObjectExistsExtended() {
-            $user = new Mock\User();
-            $c = 0;
-            $firstName = 'Foo';
-            $user->name = $firstName;
-            $user->exists('name', function()use(&$c) {
-                return isset($this->name);
-            });
-            
-            $this->assertEquals(true, isset($user->name));
-        }
-        
+               
         function testObjectCallEvent() {
             $user = new Mock\User();
             

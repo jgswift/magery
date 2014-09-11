@@ -9,6 +9,10 @@ PHP 5.4+ magic interception system using traits
 [![License](https://poser.pugx.org/jgswift/delegatr/license.svg)](https://packagist.org/packages/jgswift/delegatr)
 [![Coverage Status](https://coveralls.io/repos/jgswift/delegatr/badge.png?branch=master)](https://coveralls.io/r/jgswift/delegatr?branch=master)
 
+## Description
+
+magery provides a trait framework with which to hook into object magic, namely __get, __set, __unset, __isset, and __call.
+
 ## Installation
 
 Install via cli using [composer](https://getcomposer.org/):
@@ -25,11 +29,13 @@ Install via composer.json using [composer](https://getcomposer.org/):
 }
 ```
 
+## Dependency
+
+* php 5.4+
+
 ## Usage
 
 ### Basic
-
-Magery allows you to attach instance hooks to the magic methods: __get, __set, __unset, __isset, and __call.
 
 ```php
 class Foo
