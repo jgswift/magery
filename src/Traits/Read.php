@@ -17,5 +17,15 @@ namespace Magery\Traits {
                         ? isset($this->$name) ? $this->$name : null
                         : $value;
         }
+        
+        /**
+         * Helper method for magery
+         * @param type $variables
+         * @param type $callable
+         * @param type $cacheResponse
+         */
+        protected function read($variables, callable $callable, $cacheResponse = false) {
+            $this->magery('read', $variables, $callable, $cacheResponse);
+        }
     }
 }

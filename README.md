@@ -32,7 +32,6 @@ Install via composer.json using [composer](https://getcomposer.org/):
 Magery allows you to attach instance hooks to the magic methods: __get, __set, __unset, __isset, and __call.
 
 ```php
-<?php
 class Foo
 {
     use Magery\Mage;
@@ -41,7 +40,7 @@ class Foo
    
     public function __construct()
     {
-        $this->magery('read', 'bar', function(){
+        $this->read('bar', function(){
             throw new \Exception('Don\'t touch my bar!');
         });
     }
@@ -61,12 +60,11 @@ $foo->touchBar(); // Fatal error: Uncaught exception 'Exception' with message 'D
 A write callback could be registered to protect a variable from being overwritten (even from within the scope of your class)
 
 ```php
-$this->magery('write', 'bar', function(){
+$this->write('bar', function() {
   throw new \Exception('Don\'t write to my bar!');
 });
         
-public function writeToBar()
-{
+public function writeToBar() {
   $this->bar = 'somethingElse';
 }        
         
@@ -80,19 +78,58 @@ It is possible to intercept any object property or method with an event.
 Note: Multiple registered events will fire in the order they were added (FIFO) until an event returns a response value. 
 
 ```php
+class Foo {
+    use magery\Mage;
 
-public $bar = 'Bill';
+    public function __construct() {
+        $this->read('bar', function(){
+            return 'baz';
+        });
 
-public function __construct()
-{
-  $this->magery('read', 'bar', function(){
-    return 'Baz';
-  });
+        // Shortcut method
+        $this->read('buzz', function() {
+            return 'bar';
+        });
+    }
 }
         
         
 $foo = new Foo();
-echo $foo->bar; // "Baz"
+echo $foo->bar;     // 'baz'
+echo $foo->buzz;    // 'bar'
+```
+
+### Exists
+
+```php
+class User { 
+    private $firstName;
+    private $lastName;
+
+    function __construct($firstName, $lastName) { /* ... */ }
+}
+
+$user = new User('John', 'Doe');
+$user->exists('lastName', function()use(&$c) {
+    return isset($this->lastName);
+    // do something extra for existence check
+});
+
+var_dump(isset($user->lastName)); // true
+```
+
+### Remove
+
+```php
+$user = new User('Joe','Smith');
+$user->remove('name', function()use(&$c) {
+    unset($this->name);
+    // do something extra for remove
+});
+
+unset($user->name);
+
+var_dump(isset($user->name)); // false
 ```
 
 ### Result Caching 
@@ -105,7 +142,7 @@ public $bar = 'Bill';
 
 public function __construct()
 {
-  $this->magery('read','bar', function(){
+  $this->read('bar', function(){
     sleep(1);
     return microtime();
   }, true);     // pass in "true" here (defaults to false)
@@ -131,7 +168,7 @@ class Foo
 
 $foo = new Foo();
 
-$foo->magery('read', 'bar', function(){
+$foo->read('bar', function(){
     throw new \Exception('Don\'t touch my bar!');
 });
 
@@ -151,7 +188,7 @@ class Foo
 
 $foo = new Foo();
 
-$foo->magery('call', 'bar', function(){
+$foo->call('bar', function() {
     sleep(1);
     return microtime();
 },true);
@@ -165,18 +202,17 @@ For arrays instead of objects, using a combination of ArrayAccess and the MageAc
 
 ```php
 <?php
-class Foo implements ArrayAccess
-{
+class Foo implements ArrayAccess {
     use Magery\MageAccess;
 }
 
 $foo = new Foo();
 
-$foo->magery('get', 'bar', function(){
-    return 'Baz';
+$foo->read('bar', function() {
+    return 'baz';
 });
 
-var_dump($foo['bar']);   // Baz
+var_dump($foo['bar']);   // baz
 ```
 
 ### Custom Magic Handler
@@ -194,7 +230,7 @@ class Foo
 
 $foo = new Foo();
 
-$foo->magery('set', 'bar', function($v){
+$foo->write('bar', function($v){
     $this->baz = $v;
 });
 

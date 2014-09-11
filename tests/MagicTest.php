@@ -51,7 +51,7 @@ namespace Magery\Tests {
             $this->assertEquals($attempts,$c);
         }
 
-        function testObjectReadSpell() {
+        function testObjectReadEvent() {
             $user = new Mock\User();
             $user->name = new \stdClass();
             $firstName = 'Foo';
@@ -66,7 +66,7 @@ namespace Magery\Tests {
             $this->assertEquals(1,$c);
         }
         
-        function testObjectWriteSpell() {
+        function testObjectWriteEvent() {
             $user = new Mock\User();
             $c = 0;
             $user->magery('write', 'name', function()use(&$c) {
@@ -83,7 +83,7 @@ namespace Magery\Tests {
             $this->assertEquals(2,$c);
         }
         
-        function testArrayReadSpell() {
+        function testArrayReadEvent() {
             $user = new Mock\User;
             $c = 0;
             
@@ -100,7 +100,7 @@ namespace Magery\Tests {
             $this->assertEquals(2,$c);
         }
         
-        function testArrayWriteSpell() {
+        function testArrayWriteEvent() {
             $user = new Mock\User();
             $c=0;
             $user->magery('write','name',function()use(&$c) {
@@ -112,7 +112,7 @@ namespace Magery\Tests {
             $this->assertEquals(1,$c);
         }
         
-        function testObjectRemoveSpell() {
+        function testObjectRemoveEvent() {
             $user = new Mock\User();
             $c = 0;
             $firstName = 'Foo';
@@ -128,7 +128,19 @@ namespace Magery\Tests {
             $this->assertEquals(1,$c);
         }
         
-        function testObjectExistsSpell() {
+        function testObjectRemoveExtended() {
+            $user = new Mock\User();
+            $c = 0;
+            $firstName = 'Foo';
+            $user->name = $firstName;
+            $user->remove('name', function()use(&$c) {
+                unset($this->name);
+            });
+            
+            $this->assertEquals(false, isset($user->name));
+        }
+        
+        function testObjectExistsEvent() {
             $user = new Mock\User();
             $c = 0;
             $firstName = 'Foo';
@@ -144,7 +156,19 @@ namespace Magery\Tests {
             $this->assertEquals(1,$c);
         }
         
-        function testObjectCallSpell() {
+        function testObjectExistsExtended() {
+            $user = new Mock\User();
+            $c = 0;
+            $firstName = 'Foo';
+            $user->name = $firstName;
+            $user->exists('name', function()use(&$c) {
+                return isset($this->name);
+            });
+            
+            $this->assertEquals(true, isset($user->name));
+        }
+        
+        function testObjectCallEvent() {
             $user = new Mock\User();
             
             $c = 0;

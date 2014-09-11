@@ -7,13 +7,17 @@ namespace Magery {
     trait Object {
         /**
          * Registers spell event with global magic manager
-         * @param string $spell
+         * @param string $event
          * @param mixed $variables
          * @param callable $callable
          * @param boolean $cacheResponse
          */
-        protected function magery($spell,$variables,callable $callable,$cacheResponse=false) {
-            Magic::register($this,$spell,$variables,$callable,$cacheResponse);
+        protected function magery($event, $variables, callable $callable, $cacheResponse=false) {
+            if(!is_string($event)) {
+                throw new \InvalidArgumentException;
+            }
+            
+            Magic::register($this, $event, $variables, $callable, $cacheResponse);
         }
     }
 }
