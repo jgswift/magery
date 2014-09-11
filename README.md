@@ -5,15 +5,29 @@ PHP 5.4+ magic interception system using traits
 
 [![Build Status](https://travis-ci.org/jgswift/magery.png?branch=master)](https://travis-ci.org/jgswift/magery)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jgswift/magery/badges/quality-score.png?s=09ecf4d598dfdb7d99070e7ba8a7d197abddfae1)](https://scrutinizer-ci.com/g/jgswift/magery/)
+[![Latest Stable Version](https://poser.pugx.org/jgswift/delegatr/v/stable.svg)](https://packagist.org/packages/jgswift/delegatr)
+[![License](https://poser.pugx.org/jgswift/delegatr/license.svg)](https://packagist.org/packages/jgswift/delegatr)
+[![Coverage Status](https://coveralls.io/repos/jgswift/delegatr/badge.png?branch=master)](https://coveralls.io/r/jgswift/delegatr?branch=master)
 
 ## Installation
 
-Install via [composer](https://getcomposer.org/):
+Install via cli using [composer](https://getcomposer.org/):
 ```sh
-php composer.phar require jgswift/magery:dev-master
+php composer.phar require jgswift/magery:0.1.*
+```
+
+Install via composer.json using [composer](https://getcomposer.org/):
+```json
+{
+    "require": {
+        "jgswift/magery": "0.1.*"
+    }
+}
 ```
 
 ## Usage
+
+### Basic
 
 Magery allows you to attach instance hooks to the magic methods: __get, __set, __unset, __isset, and __call.
 
@@ -42,7 +56,9 @@ $foo = new Foo();
 $foo->touchBar(); // Fatal error: Uncaught exception 'Exception' with message 'Don't touch my bar!'
 ```
 
-Or you can register a write event to protect the variable from being overwritten (even from within the scope of your class)
+### Write
+
+A write callback could be registered to protect a variable from being overwritten (even from within the scope of your class)
 
 ```php
 $this->magery('write', 'bar', function(){
@@ -58,7 +74,10 @@ $foo = new Foo();
 $foo->writeToBar(); // Fatal error: Uncaught exception 'Exception' with message 'Don't write to my bar!'        
 ```
 
-It is possible to intercept any object property or method with a magic spell (event).  Note: Multiple registered events will fire in the order they were added (FIFO) until an event returns a response value. 
+### Read
+
+It is possible to intercept any object property or method with an event.  
+Note: Multiple registered events will fire in the order they were added (FIFO) until an event returns a response value. 
 
 ```php
 
@@ -75,6 +94,8 @@ public function __construct()
 $foo = new Foo();
 echo $foo->bar; // "Baz"
 ```
+
+### Result Caching 
 
 If the event returns a response, this may be cached to reduce execution time on future reads.
 
@@ -95,7 +116,9 @@ $foo = new Foo();
 var_dump($foo->bar === $foo->bar);   // true
 ```
 
-All events are registered globally but the magery function is protected unless otherwise specified.
+### Helper Method Scope
+
+All events are registered globally except the magery function is protected unless otherwise specified.
 
 ```php
 <?php
@@ -114,6 +137,8 @@ $foo->magery('read', 'bar', function(){
 
 $foo->bar;  // Fatal error: Uncaught exception 'Exception' with message 'Don't touch my bar!'
 ```
+
+### Call
 
 Like read, call magic also may also cache the result to reduce execution time on future calls.
 
@@ -134,6 +159,8 @@ $foo->magery('call', 'bar', function(){
 var_dump($foo->bar() === $foo->bar());   // true
 ```
 
+### Array Accessible Objects
+
 For arrays instead of objects, using a combination of ArrayAccess and the MageAccess trait will provide the same magic opportunities with array syntax
 
 ```php
@@ -152,9 +179,11 @@ $foo->magery('get', 'bar', function(){
 var_dump($foo['bar']);   // Baz
 ```
 
-You can create custom mages with selective magic.  
+### Custom Magic Handler
+
+You can create custom handlers by using traits selectively.  
 This example class only includes write magic and all other operations are performed natively without interruption.
-Custom magery objects must use ```Magery\Object``` and you may choose from the ```Traits/Read```, ```Traits/Write```, ```Traits/Remove```, ```Traits/Exists``` traits to apply specific magery functionality.
+Custom objects must use ```Magery\Object``` and you may additionally choose any combination of ```Traits/Read```, ```Traits/Write```, ```Traits/Remove```, ```Traits/Exists``` traits to apply specific magery functionality.
 
 ```php
 <?php
