@@ -5,9 +5,9 @@ PHP 5.4+ magic interception system using traits
 
 [![Build Status](https://travis-ci.org/jgswift/magery.png?branch=master)](https://travis-ci.org/jgswift/magery)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jgswift/magery/badges/quality-score.png?s=09ecf4d598dfdb7d99070e7ba8a7d197abddfae1)](https://scrutinizer-ci.com/g/jgswift/magery/)
-[![Latest Stable Version](https://poser.pugx.org/jgswift/delegatr/v/stable.svg)](https://packagist.org/packages/jgswift/delegatr)
-[![License](https://poser.pugx.org/jgswift/delegatr/license.svg)](https://packagist.org/packages/jgswift/delegatr)
-[![Coverage Status](https://coveralls.io/repos/jgswift/delegatr/badge.png?branch=master)](https://coveralls.io/r/jgswift/delegatr?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/jgswift/magery/v/stable.svg)](https://packagist.org/packages/jgswift/magery)
+[![License](https://poser.pugx.org/jgswift/magery/license.svg)](https://packagist.org/packages/jgswift/magery)
+[![Coverage Status](https://coveralls.io/repos/jgswift/magery/badge.png?branch=master)](https://coveralls.io/r/jgswift/magery?branch=master)
 
 ## Description
 
