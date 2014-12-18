@@ -90,12 +90,12 @@ namespace Magery {
         /**
          * Helper method to register individual spell
          * @param mixed $object
-         * @param string $spell
+         * @param string $event
          * @param mixed $variables
          * @param callable $callable
          * @param boolean $cacheResponse
          */
-        private static function registerSpell($object,$spell,$variables,callable $callable,$cacheResponse=false) {
+        private static function registerSpell($object,$event,$variables,callable $callable,$cacheResponse=false) {
             $id = self::id($object);
             $uniqueVars = array_unique((array)$variables);
             foreach($uniqueVars as $var) {
@@ -111,29 +111,42 @@ namespace Magery {
 
                 unset($object->$var);
 
-                $key = self::normalizeSpellName($spell);
-
-                if(is_null($key)) {
-                    return;
-                }
-                
-                if(!array_key_exists($id,self::$objects)) {
-                    self::$objects[$id] = [$key=>[]];
-                }
-
-                if(!array_key_exists($key,self::$objects[$id])) {
-                    self::$objects[$id][$key] = [];
-                }
-
-                if(!array_key_exists($var,self::$objects[$id][$key])) {
-                    self::$objects[$id][$key][$var] = [];
-                }
-
-                self::$objects[$id][$key][$var][] =  [
-                    'callable' => $callable,
-                    'cache' => $cacheResponse
-                ];
+                self::commitEventAction($id, $event, $var, $callable, $cacheResponse);
             }
+        }
+        
+        /**
+         * Stores event callable and cached response in memory for quick access
+         * @param string $id
+         * @param string $event
+         * @param string $var
+         * @param callable $callable
+         * @param boolean $cacheResponse
+         * @return null
+         */
+        private static function commitEventAction($id, $event, $var, callable $callable, $cacheResponse = false) {
+            $key = self::normalizeSpellName($event);
+
+            if(is_null($key)) {
+                return;
+            }
+
+            if(!array_key_exists($id,self::$objects)) {
+                self::$objects[$id] = [$key=>[]];
+            }
+
+            if(!array_key_exists($key,self::$objects[$id])) {
+                self::$objects[$id][$key] = [];
+            }
+
+            if(!array_key_exists($var,self::$objects[$id][$key])) {
+                self::$objects[$id][$key][$var] = [];
+            }
+
+            self::$objects[$id][$key][$var][] =  [
+                'callable' => $callable,
+                'cache' => $cacheResponse
+            ];
         }
         
         /**
@@ -172,6 +185,31 @@ namespace Magery {
          * @return mixed
          */
         private static function magicCache($id,$fn,$object,$name,$value=null) {
+            if(!(($value = self::magicEventCache($id, $fn, $object, $name, $value)) instanceof None)) {
+                return $value;
+            }
+            
+            if(!array_key_exists($id,self::$variables)) {
+                self::$variables[$id] = [];
+            }
+            
+            if(array_key_exists($name,self::$variables[$id])) {
+                return self::$variables[$id][$name];
+            }
+            
+            return null;
+        }
+        
+        /**
+         * Helper method to handle triggering of events
+         * @param string $id
+         * @param string $fn
+         * @param mixed $object
+         * @param string $name
+         * @param mixed $value
+         * @return mixed
+         */
+        private static function magicEventCache($id,$fn,$object,$name,$value) {
             if(array_key_exists($fn,self::$objects[$id]) &&
                array_key_exists($name, self::$objects[$id][$fn])) {
                 $events = &self::$objects[$id][$fn][$name];
@@ -187,15 +225,7 @@ namespace Magery {
                 }
             }
             
-            if(!array_key_exists($id,self::$variables)) {
-                self::$variables[$id] = [];
-            }
-            
-            if(array_key_exists($name,self::$variables[$id])) {
-                return self::$variables[$id][$name];
-            }
-            
-            return null;
+            return new None();
         }
         
         /**
@@ -233,15 +263,7 @@ namespace Magery {
          * @throws Exception
          */
         static function read($object,$name) {
-            $id = self::id($object);
-            
-            $value = self::magicCache($id, __FUNCTION__, $object, $name);
-            
-            if($value) {
-                return $value;
-            }
-            
-            return new None();
+            return self::call($object,$name, [], __FUNCTION__);
         }
         
         /**
@@ -293,13 +315,19 @@ namespace Magery {
          * @return mixed
          * @throws Exception
          */
-        static function call($object,$name,$arguments=[]) {
+        static function call($object,$name,$arguments=[], $spell = null) {
+            if(is_null($spell)) {
+                $spell = __FUNCTION__;
+            }
+            
             $id = self::id($object);
-            $value = self::magicCache($id, __FUNCTION__, $object, $name, $arguments);
+            $value = self::magicCache($id, $spell, $object, $name, $arguments);
             
             if($value) {
                 return $value;
             }
+            
+            return new None();
         }
     }
 }

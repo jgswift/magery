@@ -14,22 +14,21 @@ namespace Magery\Magic {
          */
         public static function trigger($object, $name, $value, &$eventData, $cache = false) {
             if($cache) {
-                return self::triggerCache($object, $name, $value, $eventData);
+                return self::notifyCache($object, $name, $value, $eventData);
             }
             
             return self::triggerDirect($object, $value, $eventData);
         }
         
         /**
-         * Cached triggering
+         * ome preliminary checks to increase fault tolerance
          * @param mixed $object
          * @param string $name
          * @param mixed $value
          * @param array $eventData
          * @return null
-         * @throws Exception
          */
-        private static function triggerCache($object, $name, $value, &$eventData) {
+        private static function notifyCache($object, $name, $value, &$eventData) {
             if($eventData['cache'] && 
                 isset($eventData['response'])) {
                 return $eventData['response'];
@@ -45,11 +44,24 @@ namespace Magery\Magic {
                 $args = $value;
             } 
             
+            return self::triggerCache($callable, $args, $name, $eventData);
+        }
+        
+        /**
+         * 
+         * @param mixed $callable
+         * @param array $args
+         * @param string $name
+         * @param array $eventData
+         * @return mixed
+         * @throws Magery\Exception
+         */
+        private static function triggerCache($callable, array $args, $name, &$eventData) {
             $response = call_user_func_array($callable,$args);
 
             if($eventData['cache'] && 
                 is_null($response)) {
-                throw new Magery\Exception('Event registered on read of variable "' . $name . '" does not return a cacheable response - cannot be null');
+                throw new Magery\Exception('Event registered on variable "' . $name . '" does not return a cacheable response - cannot be null');
             }
 
             if(isset($response)) {
